@@ -5,21 +5,21 @@ const messagesService = require('../common/messages.service');
  * @param {string} message to process
  * @return {promise} message object
  */
-const defaultAction = (messageObj) => {
-    const messages = messageObj.result.fulfillment.messages;
-    let contexts = '';
-    let constructedMessages = [];
+const defaultAction = messageObj => {
+  const messages = messageObj.result.fulfillment.messages;
+  let contexts = '';
+  let constructedMessages = [];
 
-    if (messageObj.result && messageObj.result.contexts) {
-        contexts = messageObj.result.contexts;
-    }
+  if (messageObj.result && messageObj.result.contexts) {
+    contexts = messageObj.result.contexts;
+  }
 
-    constructedMessages = messagesService.constructMessage(messages);
+  constructedMessages = messagesService.constructMessage(messages);
 
-    return Promise.resolve({
-        answer: constructedMessages,
-        context: contexts
-    });
+  return Promise.resolve({
+    answer: constructedMessages,
+    context: contexts,
+  });
 };
 
 /**
@@ -29,25 +29,31 @@ const defaultAction = (messageObj) => {
  * @return {promise} message object
  */
 const processAction = (action, messageObj, session) => {
-    // Run the fulfillment function and return the result.
-    return new Promise((resolve) => {
-        defaultAction(messageObj, session).then((result) => {
-            const returnObj = {
-                question: messageObj,
-                answer: result.answer,
-                context: result.context,
-                api: messageObj.result.contexts
-            };
+  // Run the fulfillment function and return the result.
+  return new Promise(resolve => {
+    defaultAction(messageObj, session).then(result => {
+      const returnObj = {
+        question: messageObj,
+        answer: result.answer,
+        context: result.context,
+        api: messageObj.result.contexts,
+      };
 
-            if (result.payload) {
-                returnObj.payload = result.payload;
-            }
+      if (result.payload) {
+        returnObj.payload = result.payload;
+      }
 
-            resolve(returnObj);
-        });
+      const location = result.context[0].parameters.location;
+      console.log(location);
+      // console.log(location[Object.keys(loc ation)[0]]);
+      // console.log(Object.values(result.context[0].parameters));
+      returnObj.answer = [{ text: 'fdfsdfds' }];
+
+      resolve(returnObj);
     });
+  });
 };
 
 module.exports = {
-    processAction
+  processAction,
 };
